@@ -5,4 +5,4 @@ backend/.env
 .DS_Store
 .claude/
 .agents/
-research-assistant-extension.zip
+*.zip
