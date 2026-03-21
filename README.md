@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="extension/icons/icon128.png" alt="ScepticAgent" width="128">
+</p>
+
 # ScepticAgent
 
 A Chrome extension that helps you critically analyse any webpage using AI. Verify claims, detect bias and misinformation, highlight emotional language, and chat about the content — all powered by your own API key.
