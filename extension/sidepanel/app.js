@@ -99,20 +99,25 @@ async function startAnalysis() {
   // Fire analysis streaming and quick highlights in parallel
   const highlightPromise = quickHighlightPage(pageData.content);
 
-  await streamViaPort("analyze", { url: pageData.url, title: pageData.title, content: pageData.content }, (delta) => {
-    analysisText += delta;
-    // Skip preamble — only render once a markdown heading appears
-    const firstHeading = analysisText.indexOf("\n##");
-    const renderText = firstHeading !== -1 ? analysisText.slice(firstHeading + 1) : "";
-    if (renderText) {
-      document.getElementById("analysis-content").innerHTML = renderMarkdown(renderText);
-      setupSectionCollapse();
+  await streamViaPort(
+    "analyze",
+    { url: pageData.url, title: pageData.title, content: pageData.content },
+    (delta) => {
+      analysisText += delta;
+      // Skip preamble — only render once a markdown heading appears
+      const firstHeading = analysisText.indexOf("\n##");
+      const renderText = firstHeading !== -1 ? analysisText.slice(firstHeading + 1) : "";
+      if (renderText) {
+        document.getElementById("analysis-content").innerHTML = renderMarkdown(renderText);
+        setupSectionCollapse();
+      }
+    },
+    () => {
+      if (analysisText) {
+        document.getElementById("share-btn").classList.remove("hidden");
+      }
     }
-  });
-
-  if (analysisText) {
-    document.getElementById("share-btn").classList.remove("hidden");
-  }
+  );
 
   await highlightPromise;
 }
@@ -223,7 +228,7 @@ function appendChatMsg(role, text) {
 }
 
 // ── Core streaming via background port ─────────────────────────────────────
-function streamViaPort(msgType, body, onDelta) {
+function streamViaPort(msgType, body, onDelta, onDone) {
   return new Promise((resolve) => {
     setBusy(true);
     setToolStrip(false);
@@ -232,7 +237,10 @@ function streamViaPort(msgType, body, onDelta) {
 
     port.onMessage.addListener((event) => {
       handleEvent(event, onDelta);
-      if (event.type === "done" || event.type === "error") {
+      if (event.type === "done") {
+        if (onDone) onDone();
+        port.disconnect();
+      } else if (event.type === "error") {
         port.disconnect();
       }
     });
