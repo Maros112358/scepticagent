@@ -89,7 +89,7 @@ PROVIDERS.forEach((p) => {
 });
 
 // ── Privacy policy link ───────────────────────────────────────────────────────
-const PRIVACY_POLICY_URL = "https://maros112358.github.io/verifai/privacy.html";
+const PRIVACY_POLICY_URL = "https://maros112358.github.io/scepticagent/privacy.html";
 document.getElementById("privacy-policy-link").addEventListener("click", () => {
   chrome.tabs.create({ url: PRIVACY_POLICY_URL });
 });

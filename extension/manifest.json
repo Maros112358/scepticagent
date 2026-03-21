@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Research Assistant",
+  "name": "ScepticAgent",
   "version": "1.0.0",
-  "description": "Analyse any webpage with AI. Verify claims, detect bias and misinformation, highlight emotional language, and chat about the content. Uses your own Anthropic, OpenAI, or Gemini API key — no data is collected by the extension.",
+  "description": "AI-powered webpage analyser. Verify claims, detect bias and misinformation using your own Anthropic, OpenAI, or Gemini API key.",
   "permissions": [
     "sidePanel",
     "activeTab",
