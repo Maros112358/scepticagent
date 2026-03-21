@@ -3,6 +3,6 @@ backend/venv/
 backend/.env
 *.pyc
 .DS_Store
-.claude/
+.claude/projects/
 .agents/
 *.zip
