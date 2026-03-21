@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Assistant — Privacy Policy</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+      font-size: 16px;
+      line-height: 1.7;
+      padding: 48px 24px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    h2 { font-size: 18px; margin-top: 36px; margin-bottom: 10px; }
+    p  { margin-bottom: 14px; }
+    ul { margin: 10px 0 14px 24px; }
+    li { margin-bottom: 6px; }
+    .meta { color: #666; font-size: 14px; margin-bottom: 32px; }
+    a  { color: #1a73e8; }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p class="meta">Research Assistant Chrome Extension &mdash; Last updated: March 2026</p>
+
+  <h2>Overview</h2>
+  <p>
+    Research Assistant is a Chrome extension that helps you critically analyse webpages using AI.
+    This policy explains what data the extension processes and how it is handled.
+  </p>
+
+  <h2>Data we do NOT collect</h2>
+  <p>The developer of this extension does <strong>not</strong>:</p>
+  <ul>
+    <li>Collect, store, or transmit any data to their own servers</li>
+    <li>Track usage, behaviour, or analytics of any kind</li>
+    <li>Have access to your API keys, page content, or conversations</li>
+  </ul>
+
+  <h2>Data sent to third-party AI providers</h2>
+  <p>
+    When you use Research Assistant, the text content of the webpage you are viewing and any
+    questions you type are sent directly from your browser to the AI provider you have configured
+    (Anthropic, OpenAI, or Google). This is the core function of the extension.
+  </p>
+  <p>What is sent:</p>
+  <ul>
+    <li><strong>Page content</strong> — the visible text of the webpage you are analysing</li>
+    <li><strong>Chat messages</strong> — questions you type in the Chat tab</li>
+    <li><strong>Your API key</strong> — used to authenticate each request; it is never sent anywhere other than directly to the respective provider's API endpoint</li>
+  </ul>
+  <p>These transmissions are governed by the privacy policies of each provider:</p>
+  <ul>
+    <li><a href="https://www.anthropic.com/privacy" target="_blank">Anthropic Privacy Policy</a></li>
+    <li><a href="https://openai.com/policies/privacy-policy" target="_blank">OpenAI Privacy Policy</a></li>
+    <li><a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
+  </ul>
+
+  <h2>API key storage</h2>
+  <p>
+    Your API keys are stored exclusively in your browser's local extension storage
+    (<code>chrome.storage.local</code>) on your own device. They are never synced to the cloud,
+    shared with the extension developer, or sent to any server other than the respective AI
+    provider's API endpoint.
+  </p>
+
+  <h2>Permissions used</h2>
+  <ul>
+    <li><strong>activeTab / scripting</strong> — to read the text content of the page you are analysing</li>
+    <li><strong>storage</strong> — to save your API keys and settings locally on your device</li>
+    <li><strong>sidePanel</strong> — to display the extension's interface in Chrome's side panel</li>
+    <li><strong>tabs</strong> — to open links (e.g. the API key console) in new tabs</li>
+  </ul>
+
+  <h2>Children's privacy</h2>
+  <p>This extension is not directed at children under the age of 13 and does not knowingly collect information from children.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If this policy is updated, the "Last updated" date at the top of this page will be revised. Continued use of the extension after changes constitutes acceptance of the updated policy.</p>
+
+  <h2>Contact</h2>
+  <p>If you have questions about this privacy policy, please open an issue on the extension's support page.</p>
+</body>
+</html>

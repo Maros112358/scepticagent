@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Research Assistant",
+  "version": "1.0.0",
+  "description": "Analyse any webpage with AI. Verify claims, detect bias and misinformation, highlight emotional language, and chat about the content. Uses your own Anthropic, OpenAI, or Gemini API key — no data is collected by the extension.",
+  "permissions": [
+    "sidePanel",
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel/index.html"
+  },
+  "action": {
+    "default_title": "Open Research Assistant"
+  },
+  "options_page": "options/index.html"
+}

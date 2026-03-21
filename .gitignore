@@ -1,0 +1,8 @@
+__pycache__/
+backend/venv/
+backend/.env
+*.pyc
+.DS_Store
+.claude/
+.agents/
+research-assistant-extension.zip
