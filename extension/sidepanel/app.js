@@ -67,6 +67,7 @@ document.getElementById("restart-btn").addEventListener("click", () => {
 });
 
 document.getElementById("highlight-btn").addEventListener("click", highlightPage);
+document.getElementById("share-btn").addEventListener("click", shareViaEmail);
 document.getElementById("clear-hl-btn").addEventListener("click", () => {
   sendToContentScript({ action: "clearHighlights" });
   document.getElementById("hl-legend").classList.add("hidden");
@@ -88,6 +89,7 @@ async function startAnalysis() {
   document.getElementById("analysis-content").innerHTML = "";
   document.getElementById("highlight-btn").classList.add("hidden");
   document.getElementById("clear-hl-btn").classList.add("hidden");
+  document.getElementById("share-btn").classList.add("hidden");
   document.getElementById("hl-legend").classList.add("hidden");
   analysisText = "";
   chatHistory = [];
@@ -108,6 +110,10 @@ async function startAnalysis() {
     }),
     quickHighlightPage(pageData.content),
   ]);
+
+  if (analysisText) {
+    document.getElementById("share-btn").classList.remove("hidden");
+  }
 }
 
 async function quickHighlightPage(content) {
@@ -568,6 +574,32 @@ async function highlightPage() {
 
     port.postMessage({ type: "highlights", content: pageData.content, analysis: analysisText });
   });
+}
+
+// ── Share via email ─────────────────────────────────────────────────────────
+function stripMarkdown(text) {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")        // headings
+    .replace(/\*\*(.+?)\*\*/g, "$1")    // bold
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/\*([^*\n]+)\*/g, "$1")    // italic
+    .replace(/_([^_\n]+)_/g, "$1")
+    .replace(/`{1,3}([^`]*)`{1,3}/g, "$1") // code
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links → label only
+    .replace(/^[*\-]\s+/gm, "• ")       // bullet lists
+    .replace(/^\d+\.\s+/gm, "")         // numbered lists
+    .replace(/\n{3,}/g, "\n\n")         // collapse excess blank lines
+    .trim();
+}
+
+function shareViaEmail() {
+  if (!analysisText || !pageData) return;
+
+  const subject = `ScepticAgent analysis: ${pageData.title}`;
+  const body = `${stripMarkdown(analysisText)}\n\n---\nOriginal page: ${pageData.url}`;
+
+  const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(mailto, "_self");
 }
 
 async function sendToContentScript(message) {
