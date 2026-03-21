@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Research Assistant — Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1b1e;
+      color: #c9d1d9;
+      font-size: 14px;
+      padding: 32px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 18px; color: #74c0fc; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+
+    /* Provider picker */
+    .provider-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .provider-tab {
+      flex: 1; padding: 10px 8px; background: #25262b; border: 1px solid #373a40;
+      border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.15s;
+      font-size: 12px; font-weight: 600; color: #6e7681;
+      font-family: inherit;
+    }
+    .provider-tab:hover { border-color: #4dabf7; color: #c9d1d9; }
+    .provider-tab.active { background: #1e3a5f; border-color: #4dabf7; color: #4dabf7; }
+    .provider-tab .tab-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+    .provider-tab .tab-dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: #444; margin-right: 4px; vertical-align: middle;
+    }
+    .provider-tab .tab-dot.set { background: #69db7c; }
+
+    /* Provider sections */
+    .provider-section { display: none; }
+    .provider-section.visible { display: block; }
+
+    .section {
+      background: #25262b; border: 1px solid #373a40;
+      border-radius: 8px; padding: 20px; margin-bottom: 16px;
+    }
+    .section h2 { font-size: 13px; font-weight: 600; color: #c9d1d9; margin-bottom: 14px; }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 11px; font-weight: 600; color: #6e7681; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .key-row { display: flex; gap: 8px; }
+    input[type="password"], input[type="text"], select {
+      flex: 1; background: #1a1b1e; border: 1px solid #373a40; border-radius: 6px;
+      color: #c9d1d9; font-size: 13px; padding: 8px 10px; outline: none;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+    select { font-family: inherit; cursor: pointer; }
+    input:focus, select:focus { border-color: #4dabf7; }
+    .hint { margin-top: 5px; font-size: 11px; color: #6e7681; line-height: 1.5; }
+    .hint a { color: #4dabf7; text-decoration: none; cursor: pointer; }
+    .hint a:hover { text-decoration: underline; }
+
+    button {
+      background: #4dabf7; color: #0d1117; border: none; border-radius: 6px;
+      padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: inherit; white-space: nowrap; transition: background 0.15s;
+    }
+    button:hover { background: #74c0fc; }
+    button.secondary {
+      background: #25262b; color: #c9d1d9; border: 1px solid #373a40;
+    }
+    button.secondary:hover { background: #2c2e33; color: #fff; }
+    button.icon-btn { padding: 8px 11px; }
+
+    .key-status { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; }
+    .key-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #444; }
+    .key-status.set .dot { background: #69db7c; }
+    .key-status.set .label { color: #69db7c; }
+    .key-status.unset .dot { background: #fa5252; }
+    .key-status.unset .label { color: #fa5252; }
+
+    .actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+    .saved-msg {
+      font-size: 12px; color: #69db7c; opacity: 0; transition: opacity 0.3s; margin-left: 4px;
+    }
+    .saved-msg.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <h1>🔬 Research Assistant Settings</h1>
+
+  <div class="provider-tabs">
+    <button class="provider-tab active" data-provider="anthropic">
+      <span class="tab-icon">🟣</span>
+      <span class="tab-dot" id="dot-anthropic"></span>Claude
+    </button>
+    <button class="provider-tab" data-provider="openai">
+      <span class="tab-icon">🟢</span>
+      <span class="tab-dot" id="dot-openai"></span>ChatGPT
+    </button>
+    <button class="provider-tab" data-provider="gemini">
+      <span class="tab-icon">🔵</span>
+      <span class="tab-dot" id="dot-gemini"></span>Gemini
+    </button>
+  </div>
+
+  <!-- Anthropic -->
+  <div class="provider-section visible" id="section-anthropic">
+    <div class="section">
+      <h2>Anthropic / Claude</h2>
+      <div class="field">
+        <label>Model</label>
+        <select id="anthropic-model">
+          <option value="claude-opus-4-6">Claude Opus 4.6 (most capable)</option>
+          <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (fast)</option>
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (fastest)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <div class="key-row">
+          <input type="password" id="anthropic-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+          <button class="secondary icon-btn" data-toggle="anthropic-key">👁</button>
+        </div>
+        <div class="hint">
+          <a id="anthropic-console-link">Get a key at console.anthropic.com ↗</a><br>
+          Stored locally on your device only, never synced.
+        </div>
+      </div>
+      <div class="key-status unset" id="anthropic-status">
+        <div class="dot"></div><div class="label">No key set</div>
+      </div>
+      <div class="actions">
+        <button data-save="anthropic">Save</button>
+        <span class="saved-msg" id="anthropic-saved">✓ Saved</span>
+        <button class="secondary" data-clear="anthropic" style="padding:8px 11px;font-size:12px">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OpenAI -->
+  <div class="provider-section" id="section-openai">
+    <div class="section">
+      <h2>OpenAI / ChatGPT</h2>
+      <div class="field">
+        <label>Model</label>
+        <select id="openai-model">
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="gpt-4o-mini">GPT-4o mini (faster)</option>
+          <option value="o1-mini">o1-mini</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <div class="key-row">
+          <input type="password" id="openai-key" placeholder="sk-..." autocomplete="off" spellcheck="false" />
+          <button class="secondary icon-btn" data-toggle="openai-key">👁</button>
+        </div>
+        <div class="hint">
+          <a id="openai-console-link">Get a key at platform.openai.com ↗</a><br>
+          Stored locally on your device only, never synced.
+        </div>
+      </div>
+      <div class="key-status unset" id="openai-status">
+        <div class="dot"></div><div class="label">No key set</div>
+      </div>
+      <div class="actions">
+        <button data-save="openai">Save</button>
+        <span class="saved-msg" id="openai-saved">✓ Saved</span>
+        <button class="secondary" data-clear="openai" style="padding:8px 11px;font-size:12px">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gemini -->
+  <div class="provider-section" id="section-gemini">
+    <div class="section">
+      <h2>Google / Gemini</h2>
+      <div class="field">
+        <label>Model</label>
+        <select id="gemini-model">
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (fast)</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro (most capable)</option>
+          <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (fastest)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <div class="key-row">
+          <input type="password" id="gemini-key" placeholder="AIza..." autocomplete="off" spellcheck="false" />
+          <button class="secondary icon-btn" data-toggle="gemini-key">👁</button>
+        </div>
+        <div class="hint">
+          <a id="gemini-console-link">Get a key at aistudio.google.com ↗</a><br>
+          Stored locally on your device only, never synced.
+        </div>
+      </div>
+      <div class="key-status unset" id="gemini-status">
+        <div class="dot"></div><div class="label">No key set</div>
+      </div>
+      <div class="actions">
+        <button data-save="gemini">Save</button>
+        <span class="saved-msg" id="gemini-saved">✓ Saved</span>
+        <button class="secondary" data-clear="gemini" style="padding:8px 11px;font-size:12px">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data & Privacy disclosure -->
+  <div style="margin-top:24px; padding:16px 20px; background:#25262b; border:1px solid #373a40; border-radius:8px; font-size:12px; color:#6e7681; line-height:1.6;">
+    <strong style="color:#c9d1d9; display:block; margin-bottom:6px;">Data &amp; Privacy</strong>
+    When you run an analysis or chat, the text content of the page you are viewing and your messages
+    are sent directly from your browser to the AI provider you have selected (Anthropic, OpenAI, or Google).
+    Your API keys are stored locally on your device only and are never shared with the extension developer.
+    No usage data or analytics are collected.
+    <br><br>
+    <a id="privacy-policy-link" style="color:#4dabf7; text-decoration:none; cursor:pointer;">Privacy Policy ↗</a>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
