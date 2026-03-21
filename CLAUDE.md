@@ -8,6 +8,42 @@ This file is the primary reference for AI assistants working on this codebase. R
 
 ---
 
+## Hard-won lessons — read before starting
+
+These are non-obvious issues that cost many iterations to discover. Knowing them upfront will save significant time.
+
+**1. Gemini CORS blocks `chrome-extension://` origins**
+Service workers and content scripts (isolated world) both send `Origin: chrome-extension://[id]`, which Google's API CORS policy rejects. Anthropic explicitly opted into browser access via `anthropic-dangerous-direct-browser-access: true`; Google did not. Fix: proxy Gemini requests through the content script using `chrome.tabs.sendMessage` — the content script makes the fetch from the page's `http/https` origin, which Google accepts.
+
+**2. Use `text/plain` + key in URL param for Gemini proxy**
+Setting `Content-Type: application/json` or adding `x-goog-api-key` as a header triggers a CORS preflight OPTIONS request. Using `Content-Type: text/plain` with the key as a URL query parameter makes it a simple CORS request (no preflight). Google's API parses the JSON body regardless of Content-Type.
+
+**3. Gemini `streamGenerateContent?alt=sse` fails from extension contexts**
+Non-streaming `generateContent` is the only reliable path from a Chrome extension. Do not attempt SSE streaming with Gemini.
+
+**4. `extractCompleteHighlights` needs a brace-depth scanner, not JSON.parse**
+Calling `JSON.parse` on a partial streaming buffer fails. A character-by-character brace-depth scanner that tracks string/escape state correctly extracts complete `{"phrase":...}` objects from a mid-stream buffer.
+
+**5. Use `listType` string, not `inList` boolean, in the markdown renderer**
+A boolean can't distinguish `<ul>` from `<ol>`, causing wrong closing tags and broken numbered lists. Track `"ul"` / `"ol"` / `null` with a `closeList()` helper. Match list items against `trimmed` lines (not raw) to handle indented items.
+
+**6. `return true` in `chrome.runtime.onMessage` must be at the right scope**
+For async `sendResponse` to keep the channel open, `return true` must be reached for the specific message action that uses async response. Easy to break when adding a new handler to an existing listener.
+
+**7. Git history with secrets is blocked by GitHub push protection**
+If a secret (e.g. API key in `.env`) was committed in any ancestor commit, GitHub will reject the push even if it was removed in a later commit. Fix: `git checkout --orphan clean-branch` to create a fresh history with no secret-containing commits.
+
+**8. Manifest `description` has a 132-character hard limit**
+The Chrome Web Store rejects the zip at upload time. Check length upfront: `echo -n "your description" | wc -c`.
+
+**9. `<all_urls>` host permission triggers an in-depth review warning**
+Always scope `host_permissions` to the specific API domains needed. For this extension: `https://api.anthropic.com/*`, `https://api.openai.com/*`, `https://generativelanguage.googleapis.com/*`.
+
+**10. Ad blockers can block extension API calls at the network level**
+Both service worker and content script fetches return `TypeError: Failed to fetch` when an ad blocker or DNS filter blocks the target domain. No code change fixes this — the user must whitelist the domain. Diagnose by trying a simple GET to the domain root from a content script and reporting a clear error message if it fails.
+
+---
+
 ## What this project is
 
 A Chrome extension (Manifest V3) that analyses webpages using AI. It uses a multi-turn agentic loop for Claude and single-turn calls for OpenAI and Gemini. No backend server — all AI calls are made directly from the extension to the provider's API.
