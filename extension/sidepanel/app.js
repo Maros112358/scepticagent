@@ -97,23 +97,24 @@ async function startAnalysis() {
   setStatus("Extracting page content...");
 
   // Fire analysis streaming and quick highlights in parallel
-  await Promise.all([
-    streamViaPort("analyze", { url: pageData.url, title: pageData.title, content: pageData.content }, (delta) => {
-      analysisText += delta;
-      // Skip preamble — only render once a markdown heading appears
-      const firstHeading = analysisText.indexOf("\n##");
-      const renderText = firstHeading !== -1 ? analysisText.slice(firstHeading + 1) : "";
-      if (renderText) {
-        document.getElementById("analysis-content").innerHTML = renderMarkdown(renderText);
-        setupSectionCollapse();
-      }
-    }),
-    quickHighlightPage(pageData.content),
-  ]);
+  const highlightPromise = quickHighlightPage(pageData.content);
+
+  await streamViaPort("analyze", { url: pageData.url, title: pageData.title, content: pageData.content }, (delta) => {
+    analysisText += delta;
+    // Skip preamble — only render once a markdown heading appears
+    const firstHeading = analysisText.indexOf("\n##");
+    const renderText = firstHeading !== -1 ? analysisText.slice(firstHeading + 1) : "";
+    if (renderText) {
+      document.getElementById("analysis-content").innerHTML = renderMarkdown(renderText);
+      setupSectionCollapse();
+    }
+  });
 
   if (analysisText) {
     document.getElementById("share-btn").classList.remove("hidden");
   }
+
+  await highlightPromise;
 }
 
 async function quickHighlightPage(content) {
