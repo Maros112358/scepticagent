@@ -24,6 +24,7 @@ let isBusy = false;
   }
 
   // Auto-start analysis as soon as the panel opens
+  console.log("[SA] init complete, calling startAnalysis");
   startAnalysis();
 })();
 
@@ -78,6 +79,7 @@ document.getElementById("clear-hl-btn").addEventListener("click", () => {
 });
 
 async function startAnalysis() {
+  console.log("[SA] startAnalysis called, isBusy=", isBusy);
   if (isBusy) return;
 
   pageData = await extractCurrentPage();
