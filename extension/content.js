@@ -3,6 +3,9 @@
  * Responds to messages from the side panel.
  */
 
+if (window.__raContentLoaded) return;
+window.__raContentLoaded = true;
+
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "extractContent") {
     sendResponse(extractPageContent());
