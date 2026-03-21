@@ -290,14 +290,6 @@ async function extractCurrentPage() {
       return null;
     }
 
-    // Inject content script (idempotent — safe to call multiple times)
-    try {
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
-    } catch (injErr) {
-      showError(`Could not inject into this page: ${injErr.message}`);
-      return null;
-    }
-
     const response = await chrome.tabs.sendMessage(tab.id, { action: "extractContent" });
     if (!response) { showError("Could not extract page content."); return null; }
     return response;
@@ -615,10 +607,6 @@ async function sendToContentScript(message) {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) return;
-    // Re-inject content script in case it was unloaded
-    try {
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
-    } catch (_) {}
     await chrome.tabs.sendMessage(tab.id, message);
   } catch (err) {
     console.warn("sendToContentScript failed:", err.message);
