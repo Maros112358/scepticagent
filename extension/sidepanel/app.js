@@ -67,6 +67,7 @@ document.getElementById("restart-btn").addEventListener("click", () => {
 });
 
 document.getElementById("highlight-btn").addEventListener("click", highlightPage);
+document.getElementById("share-btn").addEventListener("click", shareViaEmail);
 document.getElementById("clear-hl-btn").addEventListener("click", () => {
   sendToContentScript({ action: "clearHighlights" });
   document.getElementById("hl-legend").classList.add("hidden");
@@ -88,6 +89,7 @@ async function startAnalysis() {
   document.getElementById("analysis-content").innerHTML = "";
   document.getElementById("highlight-btn").classList.add("hidden");
   document.getElementById("clear-hl-btn").classList.add("hidden");
+  document.getElementById("share-btn").classList.add("hidden");
   document.getElementById("hl-legend").classList.add("hidden");
   analysisText = "";
   chatHistory = [];
@@ -95,8 +97,12 @@ async function startAnalysis() {
   setStatus("Extracting page content...");
 
   // Fire analysis streaming and quick highlights in parallel
-  await Promise.all([
-    streamViaPort("analyze", { url: pageData.url, title: pageData.title, content: pageData.content }, (delta) => {
+  const highlightPromise = quickHighlightPage(pageData.content);
+
+  await streamViaPort(
+    "analyze",
+    { url: pageData.url, title: pageData.title, content: pageData.content },
+    (delta) => {
       analysisText += delta;
       // Skip preamble — only render once a markdown heading appears
       const firstHeading = analysisText.indexOf("\n##");
@@ -105,9 +111,15 @@ async function startAnalysis() {
         document.getElementById("analysis-content").innerHTML = renderMarkdown(renderText);
         setupSectionCollapse();
       }
-    }),
-    quickHighlightPage(pageData.content),
-  ]);
+    },
+    () => {
+      if (analysisText) {
+        document.getElementById("share-btn").classList.remove("hidden");
+      }
+    }
+  );
+
+  await highlightPromise;
 }
 
 async function quickHighlightPage(content) {
@@ -216,7 +228,7 @@ function appendChatMsg(role, text) {
 }
 
 // ── Core streaming via background port ─────────────────────────────────────
-function streamViaPort(msgType, body, onDelta) {
+function streamViaPort(msgType, body, onDelta, onDone) {
   return new Promise((resolve) => {
     setBusy(true);
     setToolStrip(false);
@@ -225,7 +237,10 @@ function streamViaPort(msgType, body, onDelta) {
 
     port.onMessage.addListener((event) => {
       handleEvent(event, onDelta);
-      if (event.type === "done" || event.type === "error") {
+      if (event.type === "done") {
+        if (onDone) onDone();
+        port.disconnect();
+      } else if (event.type === "error") {
         port.disconnect();
       }
     });
@@ -275,7 +290,7 @@ async function extractCurrentPage() {
       return null;
     }
 
-    // Inject content script (idempotent — safe to call multiple times)
+    // Inject content script in case the tab was open before the extension loaded
     try {
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
     } catch (injErr) {
@@ -570,11 +585,36 @@ async function highlightPage() {
   });
 }
 
+// ── Share via email ─────────────────────────────────────────────────────────
+function stripMarkdown(text) {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")        // headings
+    .replace(/\*\*(.+?)\*\*/g, "$1")    // bold
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/\*([^*\n]+)\*/g, "$1")    // italic
+    .replace(/_([^_\n]+)_/g, "$1")
+    .replace(/`{1,3}([^`]*)`{1,3}/g, "$1") // code
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links → label only
+    .replace(/^[*\-]\s+/gm, "• ")       // bullet lists
+    .replace(/^\d+\.\s+/gm, "")         // numbered lists
+    .replace(/\n{3,}/g, "\n\n")         // collapse excess blank lines
+    .trim();
+}
+
+function shareViaEmail() {
+  if (!analysisText || !pageData) return;
+
+  const subject = `ScepticAgent analysis: ${pageData.title}`;
+  const body = `${stripMarkdown(analysisText)}\n\n---\nOriginal page: ${pageData.url}`;
+
+  const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(mailto, "_self");
+}
+
 async function sendToContentScript(message) {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) return;
-    // Re-inject content script in case it was unloaded
     try {
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
     } catch (_) {}

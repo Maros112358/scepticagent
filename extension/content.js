@@ -164,7 +164,7 @@ function extractPageContent() {
 
 // ── Page highlighting ──────────────────────────────────────────────────────
 
-const SKIP_TAGS = new Set(["script", "style", "noscript", "textarea", "input", "select", "code", "pre"]);
+var SKIP_TAGS = new Set(["script", "style", "noscript", "textarea", "input", "select", "code", "pre"]);
 
 function applyHighlights(highlights, startIndex = 0) {
   ensureHighlightStyles();
